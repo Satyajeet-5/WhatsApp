@@ -14,8 +14,15 @@ const qrcode = require('qrcode-terminal');
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: "my-session" }),
   puppeteer: {
-    headless: true,                  // must be headless
-    args: ['--no-sandbox', '--disable-setuid-sandbox']  // required for Linux containers
+    headless: true,                       // run headless
+    args: [
+      '--no-sandbox',                     // required in Render container
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--disable-gpu',
+      '--window-size=1920,1080'
+    ]
   }
 });
 
