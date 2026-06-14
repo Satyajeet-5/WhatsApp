@@ -2,41 +2,45 @@
 <html>
 <body>
 
-<input type="text" id="output" style="width:300px; padding:10px;">
-<button id="recordBtn">🎤</button>
+<input type="text" id="output" placeholder="Speak..." style="width:300px; padding:10px;">
+<button id="btn">🎤</button>
 
 <script>
-let mediaRecorder;
-let audioChunks = [];
+let isRecording = false;
 
-document.getElementById("recordBtn").onclick = async () => {
-    if (!mediaRecorder || mediaRecorder.state === "inactive") {
-        // Start recording
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = new SpeechRecognition();
 
-        audioChunks = [];
+recognition.continuous = true;
+recognition.interimResults = false; // only final text
 
-        mediaRecorder.ondataavailable = (event) => {
-            audioChunks.push(event.data);
-        };
+let finalText = "";
 
-        mediaRecorder.onstop = async () => {
-            const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+// Collect speech
+recognition.onresult = (event) => {
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+            finalText += event.results[i][0].transcript + " ";
+        }
+    }
+};
 
-            // For now, just show message
-            document.getElementById("output").value = "Audio recorded. Send to backend for text.";
+// When recording fully stops → show text
+recognition.onend = () => {
+    document.getElementById("output").value = finalText.trim();
+    document.getElementById("btn").innerText = "🎤";
+    isRecording = false;
+};
 
-            // 👉 Here you send audioBlob to backend (Whisper)
-        };
-
-        mediaRecorder.start();
-        document.getElementById("recordBtn").innerText = "⏹️";
-
+// Button toggle
+document.getElementById("btn").onclick = () => {
+    if (!isRecording) {
+        finalText = ""; // reset
+        recognition.start();
+        isRecording = true;
+        document.getElementById("btn").innerText = "⏹️";
     } else {
-        // Stop recording
-        mediaRecorder.stop();
-        document.getElementById("recordBtn").innerText = "🎤";
+        recognition.stop(); // triggers onend
     }
 };
 </script>
