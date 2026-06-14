@@ -2,67 +2,49 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Toggle Mic</title>
-  <style>
-    body {
-      font-family: Arial;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background: #f5f5f5;
-    }
-
-    input {
-      padding: 10px;
-      font-size: 16px;
-      width: 250px;
-    }
-
-    button {
-      padding: 10px 15px;
-      font-size: 18px;
-      margin-left: 10px;
-      cursor: pointer;
-    }
-  </style>
+  <title>Final Voice Input</title>
 </head>
 <body>
 
-<input type="text" id="inputBox" placeholder="Speak..." />
+<input type="text" id="inputBox" placeholder="Speak..." style="width:300px; padding:10px;">
 <button id="micBtn">🎤</button>
 
 <script>
-  let isListening = false;
+let isListening = false;
+let finalTranscript = '';
 
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const recognition = new SpeechRecognition();
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = new SpeechRecognition();
 
-  recognition.continuous = true;
-  recognition.interimResults = true;
+recognition.continuous = true;
+recognition.interimResults = false; // ❗ Only final results
 
-  // Convert speech to text
-  recognition.onresult = (event) => {
-    let text = '';
+// Collect final speech internally
+recognition.onresult = (event) => {
     for (let i = event.resultIndex; i < event.results.length; i++) {
-      text += event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript + ' ';
+        }
     }
-    document.getElementById("inputBox").value = text;
-  };
+};
 
-  // Button click toggle
-  document.getElementById("micBtn").onclick = () => {
+// Toggle button
+document.getElementById("micBtn").onclick = () => {
     if (!isListening) {
-      recognition.start();
-      isListening = true;
-      document.getElementById("micBtn").innerText = "⏹️"; // change icon
+        finalTranscript = ''; // reset
+        recognition.start();
+        isListening = true;
+        document.getElementById("micBtn").innerText = "⏹️";
     } else {
-      recognition.stop();
-      isListening = false;
-      document.getElementById("micBtn").innerText = "🎤";
+        recognition.stop();
+        isListening = false;
+        document.getElementById("micBtn").innerText = "🎤";
+
+        // Show text ONLY after stopping
+        document.getElementById("inputBox").value = finalTranscript.trim();
     }
-  };
+};
 </script>
 
 </body>
-</html>            
+</html>
