@@ -1,9 +1,90 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Voice Search UI</title>
+
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    .container {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        text-align: center;
+        width: 350px;
+    }
+
+    h2 {
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .input-box {
+        display: flex;
+        align-items: center;
+        border: 2px solid #ddd;
+        border-radius: 30px;
+        padding: 10px;
+    }
+
+    input {
+        border: none;
+        outline: none;
+        flex: 1;
+        font-size: 16px;
+        padding: 5px;
+    }
+
+    .mic-btn {
+        border: none;
+        background: #667eea;
+        color: white;
+        font-size: 18px;
+        padding: 10px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .mic-btn:hover {
+        background: #5a67d8;
+    }
+
+    .mic-btn.recording {
+        background: red;
+    }
+
+    .status {
+        margin-top: 15px;
+        font-size: 14px;
+        color: #666;
+    }
+
+</style>
+</head>
+
 <body>
 
-<input type="text" id="output" placeholder="Speak..." style="width:300px; padding:10px;">
-<button id="btn">🎤</button>
+<div class="container">
+    <h2>🎤 Voice Search</h2>
+
+    <div class="input-box">
+        <input type="text" id="output" placeholder="Speak something...">
+        <button id="btn" class="mic-btn">🎤</button>
+    </div>
+
+    <div class="status" id="status">Click mic to start</div>
+</div>
 
 <script>
 let isRecording = false;
@@ -12,7 +93,7 @@ const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
 const recognition = new SpeechRecognition();
 
 recognition.continuous = true;
-recognition.interimResults = false; // only final text
+recognition.interimResults = false;
 
 let finalText = "";
 
@@ -25,22 +106,28 @@ recognition.onresult = (event) => {
     }
 };
 
-// When recording fully stops → show text
+// When recording stops
 recognition.onend = () => {
     document.getElementById("output").value = finalText.trim();
+    document.getElementById("status").innerText = "Done ✅";
     document.getElementById("btn").innerText = "🎤";
+    document.getElementById("btn").classList.remove("recording");
     isRecording = false;
 };
 
-// Button toggle
+// Button click
 document.getElementById("btn").onclick = () => {
     if (!isRecording) {
-        finalText = ""; // reset
+        finalText = "";
         recognition.start();
         isRecording = true;
+
         document.getElementById("btn").innerText = "⏹️";
+        document.getElementById("btn").classList.add("recording");
+        document.getElementById("status").innerText = "Listening...";
     } else {
-        recognition.stop(); // triggers onend
+        recognition.stop();
+        document.getElementById("status").innerText = "Processing...";
     }
 };
 </script>
