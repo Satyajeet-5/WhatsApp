@@ -1,12 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Final Voice Input</title>
-</head>
+<html>
 <body>
 
-<input type="text" id="inputBox" placeholder="Speak..." style="width:300px; padding:10px;">
+<input type="text" id="inputBox" style="width:300px; padding:10px;">
 <button id="micBtn">🎤</button>
 
 <script>
@@ -17,9 +13,9 @@ const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
 const recognition = new SpeechRecognition();
 
 recognition.continuous = true;
-recognition.interimResults = false; // ❗ Only final results
+recognition.interimResults = false;
 
-// Collect final speech internally
+// Collect all chunks
 recognition.onresult = (event) => {
     for (let i = event.resultIndex; i < event.results.length; i++) {
         if (event.results[i].isFinal) {
@@ -28,20 +24,21 @@ recognition.onresult = (event) => {
     }
 };
 
-// Toggle button
+// ✅ Show result ONLY when recognition fully ends
+recognition.onend = () => {
+    document.getElementById("inputBox").value = finalTranscript.trim();
+    isListening = false;
+    document.getElementById("micBtn").innerText = "🎤";
+};
+
 document.getElementById("micBtn").onclick = () => {
     if (!isListening) {
-        finalTranscript = ''; // reset
+        finalTranscript = '';
         recognition.start();
         isListening = true;
         document.getElementById("micBtn").innerText = "⏹️";
     } else {
-        recognition.stop();
-        isListening = false;
-        document.getElementById("micBtn").innerText = "🎤";
-
-        // Show text ONLY after stopping
-        document.getElementById("inputBox").value = finalTranscript.trim();
+        recognition.stop(); // wait for onend
     }
 };
 </script>
