@@ -2,31 +2,38 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Voice Search UI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voice Search</title>
 
 <style>
+    * {
+        box-sizing: border-box;
+    }
+
     body {
         margin: 0;
-        height: 100vh;
+        min-height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
         font-family: Arial, sans-serif;
         background: linear-gradient(135deg, #667eea, #764ba2);
+        padding: 15px;
     }
 
     .container {
         background: white;
-        padding: 30px;
+        padding: 25px;
         border-radius: 15px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        width: 100%;
+        max-width: 400px;
         text-align: center;
-        width: 350px;
     }
 
     h2 {
         margin-bottom: 20px;
-        color: #333;
+        font-size: 22px;
     }
 
     .input-box {
@@ -34,7 +41,8 @@
         align-items: center;
         border: 2px solid #ddd;
         border-radius: 30px;
-        padding: 10px;
+        padding: 8px 10px;
+        width: 100%;
     }
 
     input {
@@ -42,7 +50,8 @@
         outline: none;
         flex: 1;
         font-size: 16px;
-        padding: 5px;
+        padding: 8px;
+        min-width: 0;
     }
 
     .mic-btn {
@@ -54,10 +63,7 @@
         border-radius: 50%;
         cursor: pointer;
         transition: 0.3s;
-    }
-
-    .mic-btn:hover {
-        background: #5a67d8;
+        flex-shrink: 0;
     }
 
     .mic-btn.recording {
@@ -67,9 +73,28 @@
     .status {
         margin-top: 15px;
         font-size: 14px;
-        color: #666;
+        color: #555;
     }
 
+    /* 📱 Mobile adjustments */
+    @media (max-width: 480px) {
+        .container {
+            padding: 20px;
+        }
+
+        h2 {
+            font-size: 18px;
+        }
+
+        input {
+            font-size: 14px;
+        }
+
+        .mic-btn {
+            font-size: 16px;
+            padding: 8px;
+        }
+    }
 </style>
 </head>
 
@@ -83,7 +108,7 @@
         <button id="btn" class="mic-btn">🎤</button>
     </div>
 
-    <div class="status" id="status">Click mic to start</div>
+    <div class="status" id="status">Tap mic to start</div>
 </div>
 
 <script>
@@ -97,7 +122,6 @@ recognition.interimResults = false;
 
 let finalText = "";
 
-// Collect speech
 recognition.onresult = (event) => {
     for (let i = event.resultIndex; i < event.results.length; i++) {
         if (event.results[i].isFinal) {
@@ -106,7 +130,6 @@ recognition.onresult = (event) => {
     }
 };
 
-// When recording stops
 recognition.onend = () => {
     document.getElementById("output").value = finalText.trim();
     document.getElementById("status").innerText = "Done ✅";
@@ -115,7 +138,6 @@ recognition.onend = () => {
     isRecording = false;
 };
 
-// Button click
 document.getElementById("btn").onclick = () => {
     if (!isRecording) {
         finalText = "";
